@@ -13,6 +13,7 @@ const els = {
   toggleBtn: document.getElementById("toggleBtn"),
   dayList: document.getElementById("dayList"),
   sessionCount: document.getElementById("sessionCount"),
+  monthProjectFilter: document.getElementById("monthProjectFilter"),
   projectDialog: document.getElementById("projectDialog"),
   projectForm: document.getElementById("projectForm"),
   projectName: document.getElementById("projectName"),
@@ -57,6 +58,7 @@ const firebaseBase = DEFAULT_FIREBASE_URL;
 const cloudId = DEFAULT_WORKSPACE_ID;
 let syncMessage = "";
 let pushTimer = null;
+let monthProjectFilter = "";
 let syncing = false;
 
 function snapshot() {
@@ -177,6 +179,22 @@ function renderProjects() {
     els.projectSelect.append(option);
   }
   els.projectSelect.value = state.selectedProjectId;
+
+  const previous = monthProjectFilter;
+  els.monthProjectFilter.innerHTML = "";
+  const all = document.createElement("option");
+  all.value = "";
+  all.textContent = "Alle projecten";
+  els.monthProjectFilter.append(all);
+  for (const project of state.projects) {
+    const option = document.createElement("option");
+    option.value = project.id;
+    option.textContent = project.name;
+    els.monthProjectFilter.append(option);
+  }
+  const stillExists = !previous || state.projects.some((p) => p.id === previous);
+  monthProjectFilter = stillExists ? previous : "";
+  els.monthProjectFilter.value = monthProjectFilter;
 }
 
 function renderClock() {
@@ -197,7 +215,10 @@ function renderClock() {
 
 function renderMonth() {
   const month = els.monthInput.value;
-  const sessions = sessionsForMonth(month);
+  const allSessions = sessionsForMonth(month);
+  const sessions = monthProjectFilter
+    ? allSessions.filter((session) => session.projectId === monthProjectFilter)
+    : allSessions;
   const total = sessions.reduce((sum, session) => sum + sessionDuration(session), 0);
   const [year, monthNum] = month.split("-");
   const monthLabel = new Date(Number(year), Number(monthNum) - 1, 1).toLocaleDateString(
@@ -205,11 +226,16 @@ function renderMonth() {
     { month: "long", year: "numeric" }
   );
 
-  els.monthTotal.textContent = `${formatHours(total)} in ${monthLabel}`;
-  els.sessionCount.textContent = `${sessions.length} sessie${sessions.length === 1 ? "" : "s"}`;
+  const filterName = monthProjectFilter ? projectName(monthProjectFilter) : null;
+  els.monthTotal.textContent = filterName
+    ? `${formatHours(total)} voor ${filterName} in ${monthLabel}`
+    : `${formatHours(total)} in ${monthLabel}`;
+  els.sessionCount.textContent = `${sessions.length} sessie${sessions.length === 1 ? "" : "s"} · ${formatHours(total)}`;
 
   if (!sessions.length) {
-    els.dayList.innerHTML = `<p class="empty">Nog geen uren in deze maand. Zet de klok aan als je begint.</p>`;
+    els.dayList.innerHTML = filterName
+      ? `<p class="empty">Geen uren voor ${filterName} in deze maand.</p>`
+      : `<p class="empty">Nog geen uren in deze maand. Zet de klok aan als je begint.</p>`;
     return;
   }
 
@@ -366,6 +392,11 @@ els.projectForm.addEventListener("submit", (event) => {
 });
 
 els.monthInput.addEventListener("change", render);
+
+els.monthProjectFilter.addEventListener("change", () => {
+  monthProjectFilter = els.monthProjectFilter.value;
+  renderMonth();
+});
 
 setInterval(() => {
   if (state.active) {

@@ -39,8 +39,14 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Deze maand</h2>
-          <p id="sessionCount" class="muted"></p>
+          <div>
+            <h2>Deze maand</h2>
+            <p id="sessionCount" class="muted"></p>
+          </div>
+          <label class="month-filter">
+            <span>Project</span>
+            <select id="monthProjectFilter" aria-label="Filter op project"></select>
+          </label>
         </div>
         <div id="dayList" class="day-list"></div>
       </section>
