@@ -1,4 +1,4 @@
-const ALLOWED_EMAIL = "berthofmans@gmail.com";
+const ALLOWED_EMAILS = ["berthofmans@gmail.com"];
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCHleHJxgogiNpaYxh2Ktaw-ZL25la0Nns",
   authDomain: "worklog-be6e2.firebaseapp.com",
@@ -29,6 +29,7 @@ const els = {
   loginScreen: document.getElementById("loginScreen"),
   loginError: document.getElementById("loginError"),
   googleBtn: document.getElementById("googleBtn"),
+  microsoftBtn: document.getElementById("microsoftBtn"),
   signOutBtn: document.getElementById("signOutBtn"),
 };
 
@@ -415,10 +416,14 @@ els.projectForm.addEventListener("submit", (event) => {
 
 els.monthInput.addEventListener("change", render);
 
+function isAllowedEmail(email) {
+  return ALLOWED_EMAILS.includes((email || "").toLowerCase());
+}
+
 function friendlyAuthError(error) {
   const code = error?.code || "";
   if (code === "auth/operation-not-allowed") {
-    return "Google-login staat nog uit. Zet in Firebase Authentication de methode Google aan.";
+    return "Deze inlogmethode staat nog uit in Firebase Authentication.";
   }
   if (code === "auth/unauthorized-domain") {
     return "Dit domein is nog niet toegestaan. Voeg in Firebase Authentication → Settings localhost en hofb85.github.io toe.";
@@ -426,7 +431,10 @@ function friendlyAuthError(error) {
   if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
     return "Het inlogvenster werd geblokkeerd of gesloten. Probeer opnieuw.";
   }
-  return "Inloggen mislukt. Controleer of Google-login in Firebase aanstaat.";
+  if (code === "auth/invalid-credential" || code === "auth/invalid-oauth-client-id") {
+    return "Microsoft-login is nog niet compleet ingesteld. Vul in Firebase de Application ID en secret van Azure in.";
+  }
+  return "Inloggen mislukt. Controleer of deze methode in Firebase aanstaat.";
 }
 
 function showLogin(message) {
@@ -454,9 +462,9 @@ async function initAuth() {
       return;
     }
     const email = (user.email || "").toLowerCase();
-    if (email !== ALLOWED_EMAIL) {
+    if (!isAllowedEmail(email)) {
       await firebase.auth().signOut();
-      showLogin("Dit Google-account heeft geen toegang tot WorkLog.");
+      showLogin("Dit account heeft geen toegang tot WorkLog.");
       return;
     }
     idToken = await user.getIdToken();
@@ -471,8 +479,21 @@ els.googleBtn.addEventListener("click", async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({
-      login_hint: ALLOWED_EMAIL,
       prompt: "select_account",
+    });
+    await firebase.auth().signInWithPopup(provider);
+  } catch (error) {
+    showLogin(friendlyAuthError(error));
+  }
+});
+
+els.microsoftBtn.addEventListener("click", async () => {
+  els.loginError.textContent = "";
+  try {
+    const provider = new firebase.auth.OAuthProvider("microsoft.com");
+    provider.setCustomParameters({
+      prompt: "select_account",
+      tenant: "common",
     });
     await firebase.auth().signInWithPopup(provider);
   } catch (error) {

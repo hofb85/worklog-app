@@ -4,16 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WorkLog</title>
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
     <div id="loginScreen" class="login-screen">
       <section class="clock-card login-card">
         <p class="eyebrow">Urenregistratie</p>
         <h1>WorkLog</h1>
-        <p class="muted dialog-copy">Log in met je Google-account om je uren te zien.</p>
+        <p class="muted dialog-copy">Log in met Google of Microsoft om je uren te zien.</p>
         <p id="loginError" class="login-error"></p>
-        <button id="googleBtn" class="primary" type="button">Inloggen met Google</button>
+        <div class="login-actions">
+          <button id="googleBtn" class="primary" type="button">Inloggen met Google</button>
+          <button id="microsoftBtn" class="ghost" type="button">Inloggen met Microsoft</button>
+        </div>
       </section>
     </div>
 
@@ -76,6 +79,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.4.0/firebase-auth-compat.js"></script>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
   </body>
 </html>
