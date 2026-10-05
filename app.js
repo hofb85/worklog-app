@@ -1,4 +1,10 @@
-const STORAGE_KEY = "worklog-v1";
+const ALLOWED_EMAIL = "berthofmans@gmail.com";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCHleHJxgogiNpaYxh2Ktaw-ZL25la0Nns",
+  authDomain: "worklog-be6e2.firebaseapp.com",
+  databaseURL: "https://worklog-be6e2-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "worklog-be6e2",
+};
 const DEFAULT_FIREBASE_URL =
   "https://worklog-be6e2-default-rtdb.europe-west1.firebasedatabase.app";
 const DEFAULT_WORKSPACE_ID = "ddb6cf95-56d1-4eb5-a689-6d764fc9b3e4";
@@ -19,6 +25,11 @@ const els = {
   projectName: document.getElementById("projectName"),
   cancelProject: document.getElementById("cancelProject"),
   syncStatus: document.getElementById("syncStatus"),
+  app: document.getElementById("app"),
+  loginScreen: document.getElementById("loginScreen"),
+  loginError: document.getElementById("loginError"),
+  googleBtn: document.getElementById("googleBtn"),
+  signOutBtn: document.getElementById("signOutBtn"),
 };
 
 function nowIso() {
@@ -60,6 +71,7 @@ let syncMessage = "";
 let pushTimer = null;
 let monthProjectFilter = "";
 let syncing = false;
+let idToken = "";
 
 function snapshot() {
   return {
@@ -91,7 +103,9 @@ function saveState() {
 }
 
 function cloudUrl() {
-  return `${DEFAULT_FIREBASE_URL}/worklog/${DEFAULT_WORKSPACE_ID}.json`;
+  const url = `${DEFAULT_FIREBASE_URL}/worklog/${DEFAULT_WORKSPACE_ID}.json`;
+  if (!idToken) return url;
+  return `${url}?auth=${encodeURIComponent(idToken)}`;
 }
 
 function pad(n) {
@@ -292,7 +306,7 @@ function render() {
 }
 
 async function pullCloud() {
-  if (!cloudId || !firebaseBase || syncing) return;
+  if (!cloudId || !firebaseBase || syncing || !idToken) return;
   syncing = true;
   try {
     const res = await fetch(cloudUrl(), { headers: { Accept: "application/json" } });
@@ -319,7 +333,7 @@ async function pullCloud() {
 }
 
 async function pushCloud() {
-  if (!cloudId || !firebaseBase) return;
+  if (!cloudId || !firebaseBase || !idToken) return;
   try {
     const res = await fetch(cloudUrl(), {
       method: "PUT",
@@ -339,7 +353,7 @@ async function pushCloud() {
 }
 
 function queuePush() {
-  if (!cloudId) return;
+  if (!cloudId || !idToken) return;
   clearTimeout(pushTimer);
   pushTimer = setTimeout(pushCloud, 400);
 }
@@ -401,6 +415,73 @@ els.projectForm.addEventListener("submit", (event) => {
 
 els.monthInput.addEventListener("change", render);
 
+function friendlyAuthError(error) {
+  const code = error?.code || "";
+  if (code === "auth/operation-not-allowed") {
+    return "Google-login staat nog uit. Zet in Firebase Authentication de methode Google aan.";
+  }
+  if (code === "auth/unauthorized-domain") {
+    return "Dit domein is nog niet toegestaan. Voeg in Firebase Authentication → Settings localhost en hofb85.github.io toe.";
+  }
+  if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
+    return "Het inlogvenster werd geblokkeerd of gesloten. Probeer opnieuw.";
+  }
+  return "Inloggen mislukt. Controleer of Google-login in Firebase aanstaat.";
+}
+
+function showLogin(message) {
+  els.loginError.textContent = message || "";
+  els.loginScreen.classList.remove("hidden");
+  els.app.classList.add("hidden");
+}
+
+function showApp() {
+  els.loginError.textContent = "";
+  els.loginScreen.classList.add("hidden");
+  els.app.classList.remove("hidden");
+}
+
+async function initAuth() {
+  if (typeof firebase === "undefined") {
+    showLogin("Firebase kon niet geladen worden. Controleer je internetverbinding.");
+    return;
+  }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+      idToken = "";
+      showLogin();
+      return;
+    }
+    const email = (user.email || "").toLowerCase();
+    if (email !== ALLOWED_EMAIL) {
+      await firebase.auth().signOut();
+      showLogin("Dit Google-account heeft geen toegang tot WorkLog.");
+      return;
+    }
+    idToken = await user.getIdToken();
+    showApp();
+    render();
+    pullCloud();
+  });
+}
+
+els.googleBtn.addEventListener("click", async () => {
+  els.loginError.textContent = "";
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({
+      login_hint: ALLOWED_EMAIL,
+      prompt: "select_account",
+    });
+    await firebase.auth().signInWithPopup(provider);
+  } catch (error) {
+    showLogin(friendlyAuthError(error));
+  }
+});
+
+els.signOutBtn.addEventListener("click", () => firebase.auth().signOut());
+
 setInterval(() => {
   if (state.active) {
     renderClock();
@@ -413,5 +494,4 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") pullCloud();
 });
 
-render();
-pullCloud();
+initAuth();
