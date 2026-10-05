@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorkLog</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div>
+          <p class="eyebrow">Urenregistratie</p>
+          <h1>WorkLog</h1>
+        </div>
+        <div class="top-actions">
+          <label class="month-picker">
+            <span>Maand</span>
+            <input id="monthInput" type="month" />
+          </label>
+        </div>
+      </header>
+      <p id="syncStatus" class="sync-status">Uren worden online bijgewerkt</p>
+
+      <section class="clock-card">
+        <div class="project-row">
+          <select id="projectSelect" aria-label="Project"></select>
+          <button id="newProjectBtn" class="ghost" type="button">+ Project</button>
+        </div>
+
+        <p id="clockLabel" class="clock-label">Klaar om te starten</p>
+        <p id="clock" class="clock">00:00:00</p>
+        <p id="monthTotal" class="month-total"></p>
+
+        <div class="actions">
+          <button id="toggleBtn" class="primary" type="button">Start klok</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Deze maand</h2>
+          <p id="sessionCount" class="muted"></p>
+        </div>
+        <div id="dayList" class="day-list"></div>
+      </section>
+    </div>
+
+    <dialog id="projectDialog">
+      <form id="projectForm" method="dialog">
+        <h3>Nieuw project</h3>
+        <label>
+          Naam
+          <input id="projectName" type="text" required maxlength="80" placeholder="Bijv. Website redesign" />
+        </label>
+        <div class="dialog-actions">
+          <button value="cancel" type="button" id="cancelProject" class="ghost">Annuleren</button>
+          <button value="ok" class="primary" type="submit">Toevoegen</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,273 @@
+:root {
+  --bg: #efe8dc;
+  --paper: #fffaf2;
+  --ink: #1f1a16;
+  --muted: #6b6158;
+  --line: #e4d9c8;
+  --accent: #b42318;
+  --go: #1f6b45;
+  --shadow: 0 18px 40px rgba(54, 38, 22, 0.12);
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 400px at 10% -10%, #f7f1e6, transparent),
+    var(--bg);
+  color: var(--ink);
+}
+
+.app {
+  width: min(720px, calc(100% - 32px));
+  margin: 32px auto 64px;
+  display: grid;
+  gap: 20px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 650;
+}
+
+.top-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.month-picker {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sync-status {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.setup-help {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: left;
+}
+
+.setup-help ol {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.setup-help a {
+  color: var(--go);
+}
+
+.text-btn {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  padding: 0;
+  justify-self: start;
+  text-decoration: underline;
+}
+
+.dialog-actions.wrap {
+  flex-wrap: wrap;
+}
+
+#closeSyncBtn {
+  justify-self: end;
+}
+
+.month-picker input,
+select,
+input[type="text"] {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.clock-card,
+.panel,
+dialog {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+.clock-card {
+  padding: 28px;
+  text-align: center;
+}
+
+.project-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.project-row select {
+  min-width: 220px;
+}
+
+.clock-label {
+  margin: 28px 0 0;
+  color: var(--muted);
+}
+
+.clock {
+  margin: 4px 0 8px;
+  font-size: clamp(48px, 12vw, 84px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.month-total {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+}
+
+.primary {
+  background: var(--go);
+  color: white;
+}
+
+.primary.stop {
+  background: var(--accent);
+}
+
+.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.hidden {
+  display: none;
+}
+
+.panel {
+  padding: 22px 24px 10px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0;
+}
+
+.day-list {
+  display: grid;
+}
+
+.day {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.day-head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.session {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.empty {
+  padding: 18px 0 24px;
+  color: var(--muted);
+}
+
+dialog {
+  border: 0;
+  padding: 24px;
+  width: min(420px, 92vw);
+}
+
+dialog::backdrop {
+  background: rgba(31, 26, 22, 0.35);
+}
+
+dialog form {
+  display: grid;
+  gap: 14px;
+}
+
+dialog label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .top,
+  .top-actions,
+  .project-row,
+  .day-head,
+  .session {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
