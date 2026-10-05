@@ -179,22 +179,30 @@ function renderProjects() {
     els.projectSelect.append(option);
   }
   els.projectSelect.value = state.selectedProjectId;
+  renderFilterPills();
+}
 
-  const previous = monthProjectFilter;
+function renderFilterPills() {
+  if (!els.monthProjectFilter) return;
+  const stillExists = !monthProjectFilter || state.projects.some((p) => p.id === monthProjectFilter);
+  if (!stillExists) monthProjectFilter = "";
+
+  const items = [{ id: "", name: "Alle projecten" }, ...state.projects];
   els.monthProjectFilter.innerHTML = "";
-  const all = document.createElement("option");
-  all.value = "";
-  all.textContent = "Alle projecten";
-  els.monthProjectFilter.append(all);
-  for (const project of state.projects) {
-    const option = document.createElement("option");
-    option.value = project.id;
-    option.textContent = project.name;
-    els.monthProjectFilter.append(option);
+  for (const item of items) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pill" + (monthProjectFilter === item.id ? " active" : "");
+    button.textContent = item.name;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", monthProjectFilter === item.id ? "true" : "false");
+    button.addEventListener("click", () => {
+      monthProjectFilter = item.id;
+      renderFilterPills();
+      renderMonth();
+    });
+    els.monthProjectFilter.append(button);
   }
-  const stillExists = !previous || state.projects.some((p) => p.id === previous);
-  monthProjectFilter = stillExists ? previous : "";
-  els.monthProjectFilter.value = monthProjectFilter;
 }
 
 function renderClock() {
@@ -392,11 +400,6 @@ els.projectForm.addEventListener("submit", (event) => {
 });
 
 els.monthInput.addEventListener("change", render);
-
-els.monthProjectFilter.addEventListener("change", () => {
-  monthProjectFilter = els.monthProjectFilter.value;
-  renderMonth();
-});
 
 setInterval(() => {
   if (state.active) {

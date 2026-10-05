@@ -201,15 +201,26 @@ button {
   margin-bottom: 8px;
 }
 
-.month-filter {
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--muted);
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 10px;
 }
 
-.month-filter select {
-  min-width: 180px;
+.filter-pills .pill {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.filter-pills .pill.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fffaf2;
 }
 
 .muted {
